@@ -1,19 +1,21 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // ✅ Add this
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_KEY,
-  authDomain: "chat-ab746.firebaseapp.com",
-  projectId: "chat-ab746",
-  storageBucket: "chat-ab746.appspot.com",
-  messagingSenderId: "901216368405",
-  appId: "1:901216368405:web:8ec942ee51611df5c49b1c",
+  apiKey: "AIzaSyBEM21Gnlysp2pPiZFhSnn3xMhb5EpTjGs",
+  authDomain: "chat-application-dee4e.firebaseapp.com",
+  projectId: "chat-application-dee4e",
+  storageBucket: "chat-application-dee4e.appspot.com", // ✅ Make sure this ends in `.appspot.com`
+  messagingSenderId: "752482373708",
+  appId: "1:752482373708:web:578d1dc27b282dd7d5e4e9"
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth();
-export const storage = getStorage();
-export const db = getFirestore()
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app); // ✅ Create a storage instance
+
+export { auth, db, storage }; // ✅ Export it
