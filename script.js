@@ -58,3 +58,46 @@ export async function retry(fn, { attempts = 3, delay = 200, backoff = 2, jitter
     }
   }
 }
+
+/* =========================
+   Async Queue & Worker Pool
+   - bounded concurrency
+   - optional rateLimit (ms between tasks)
+   ========================= */
+
+export class AsyncQueue {
+  constructor(concurrency = 4, { rateLimit = 0 } = {}) {
+    this.concurrency = concurrency;
+    this.running = 0;
+    this.queue = [];
+    this.rateLimit = rateLimit;
+  }
+
+  push(task) {
+    return new Promise((res, rej) => {
+      this.queue.push({ task, res, rej });
+      this._next();
+    });
+  }
+
+  async _next() {
+    if (this.running >= this.concurrency) return;
+    const item = this.queue.shift();
+    if (!item) return;
+    this.running++;
+    try {
+      const result = await item.task();
+      item.res(result);
+    } catch (err) {
+      item.rej(err);
+    } finally {
+      this.running--;
+      if (this.rateLimit > 0) {
+        setTimeout(() => this._next(), this.rateLimit);
+      } else {
+        // next tick to avoid deep recursion
+        setImmediate ? setImmediate(() => this._next()) : setTimeout(() => this._next(), 0);
+      }
+    }
+  }
+}
